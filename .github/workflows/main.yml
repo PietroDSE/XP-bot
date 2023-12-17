@@ -1,0 +1,17 @@
+name: Ping Bot
+
+on:
+  schedule:
+    - cron: '*/1 * * *'  # Define a frequência da execução (a cada 1 minuto)
+
+jobs:
+  ping-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Ping Bot
+      run: |
+        curl -X POST https://XP-bot.github.io/
