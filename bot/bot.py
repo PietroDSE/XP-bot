@@ -1,66 +1,57 @@
 import discord
 from discord.ext import commands
-import firebase_admin
-from firebase_admin import credentials, db
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
+import asyncio
+from xp_tracker_gui import XpTrackerApp, tk
 
-# Inicializa o Firebase
-cred = credentials.Certificate("Usuários/davill08/Downloads/bot-xp-7cc5d-firebase-adminsdk-htkae-b802b0aa1c")
-firebase_admin.initialize_app(cred, {"databaseURL": "https://bot-xp-7cc5d.firebaseio.com"})
-ref = db.reference("users")
+bot = commands.Bot(command_prefix='!')
+app_instance = None
+message_count = {}
 
-# Configuração do bot
-bot = commands.Bot(command_prefix="!")
-
-# Função para obter o hash do usuário
-def get_user_hash(user_id):
-    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-    digest.update(user_id.encode('utf-8'))
-    return digest.finalize()
-
-# Função para calcular o nível com base na pontuação
-def calculate_level(xp):
-    # Lógica de cálculo do nível (personalize conforme necessário)
-    return xp // 100  # Exemplo simples: 100 pontos por nível
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user.name}!")
+    print(f'Logged in as {bot.user.name}!')
+    # lógica quando o bot estiver pronto
+
 
 @bot.event
 async def on_message(message):
-    if message.author.bot:
-        return
-    
-    user_id = str(message.author.id)
-    user_hash = get_user_hash(user_id)
-
-    # Lógica para obter e atualizar XP com user_hash
-    user_ref = ref.child(user_hash.hex())
-    xp = user_ref.child("xp").get() or 0
-    xp += 5
-    user_ref.update({"xp": xp})
-
-    # Lógica para calcular o nível
-    level = calculate_level(xp)
-
-    # Restante da lógica com user_hash
-    # ...
-
+    global app_instance
     await bot.process_commands(message)
+    if not message.author.bot:
+        user_id = str(message.author.id)
+        # lógica quando uma mensagem for enviada
 
-@bot.command(name="level")
+    if user_id not in message_count:
+        message_count[user_id] = 1
+    else:
+        message_count[user_id] += 1
+        # inicia a contagem de level ao novo usuário
+
+    if message_count[user_id] % 5 == 0:
+        xp_gain = 5
+        # método de obtenção de xp
+        xp = 200
+        level = 2
+        app_instance.update_gui(xp, level)
+        # atualização do GUI
+
+
+@bot.command(name='level')
 async def level(ctx):
-    user_id = str(ctx.author.id)
-    user_hash = get_user_hash(user_id)
+    # Lógica do comando !level aqui
+    await ctx.send('Comando !level executado.')
 
-    # Lógica para obter nível e XP com user_hash
-    user_ref = ref.child(user_hash.hex())
-    xp = user_ref.child("xp").get() or 0
-    level = calculate_level(xp)
 
-    await ctx.send(f"{ctx.author.mention}, seu nível é {level} e você tem {xp} pontos de XP")
+async def update_gui(app):
+    # Lógica para obter dados do bot Discord e atualizar a GUI
+    while True:
+        # Exemplo: Atualizar a GUI a cada 10 segundos
+        await asyncio.sleep(10)
+        app_instance.update_gui(200, 2)  # Substitua pelos dados reais
 
-# Substitua 'YOUR_BOT_TOKEN' pelo seu token real
-bot.run("YOUR_BOT_TOKEN")
+if __name__ == '__main__':
+    app_instance = XpTrackerApp(tk.Tk())
+    loop = asyncio.get_event_loop()
+    loop.create_task(update_gui(app_instance))
+    bot.run('MTE4NTY4MjY0MDI1MTEyOTkyNw.GN_wWh.xuxLWPNMUwQ_w2uPB7uyV8eOrOyWeJ6YEQ7AwM')
