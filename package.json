@@ -1,0 +1,6 @@
+{
+    "scripts": {
+      "start": "python bot/main.py"
+    }
+  }
+  
