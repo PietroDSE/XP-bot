@@ -1,10 +1,13 @@
+# tk_file.py
 import tkinter as tk
 from tkinter import ttk
+from config import SharedConfig
+
 class XpTrackerApp:
-    def __init__(self, root):
+    def __init__(self, root, shared_config):
         self.root = root
+        self.shared_config = shared_config
         self.root.title('XP Tracker GUI')
-        self.xp_to_next_level = 100  # Valor inicial de XP necessário para subir de nível
 
         self.label = ttk.Label(self.root, text='XP Tracker GUI')
         self.label.pack(padx=10, pady=10)
@@ -21,16 +24,20 @@ class XpTrackerApp:
         self.xp_bar['value'] = xp
         self.level_label['text'] = f'Level: {level}'
 
-        # Verifica se o jogador subiu de nível
-        if xp >= self.xp_to_next_level:
-            self.xp_to_next_level *= 1.2 
+        # Verifica se o usuário subiu de nível
+        if xp >= self.shared_config.xp_to_next_level:
+            self.shared_config.xp_to_next_level *= 1.2
             level += 1
-        # Aumenta a quantidade de xp necessário para subir de nível
+            # Aumenta a quantidade de xp necessário para subir de nível
             
         # Atualiza o rótulo de nível com base no novo nível
         self.level_label['text'] = f'Level: {level}'
 
+    def start_gui(self):
+        self.root.mainloop()
+
 if __name__ == '__main__':
     root = tk.Tk()
-    app = XpTrackerApp(root)
-    root.mainloop()
+    shared_config = SharedConfig()
+    app_instance = XpTrackerApp(root, shared_config)
+    app_instance.start_gui()
