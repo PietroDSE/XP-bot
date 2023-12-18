@@ -2,12 +2,15 @@
 import discord
 from discord.ext import commands
 import asyncio
+from discord import Intents
 from config import SharedConfig
 from xp_tracker_gui import XpTrackerApp
 
-bot = commands.Bot(command_prefix='!')
+intents = Intents.all()
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 shared_config = SharedConfig()
+
 app_instance = XpTrackerApp(shared_config)
 
 @bot.event
@@ -75,4 +78,5 @@ if __name__ == '__main__':
 
     loop = asyncio.get_event_loop()
     loop.create_task(periodic_task())
-    bot.run('SEU_TOKEN')
+    loop.create_task(update_gui())
+    bot.run('MTE4NTY4MjY0MDI1MTEyOTkyNw.G143v-.azWC67h_CE4_-8PgYNjPUepR2r0w3KZe88tXrcx')
